@@ -1,0 +1,42 @@
+image: node:latest
+
+stages:
+  - build
+  - test
+  - deploy
+  - manual_confirmation
+  - cleanup_job
+
+cache:
+  paths:
+    - node_modules/
+
+
+build:
+  stage: build
+  script:
+    - npm install
+
+test:
+  stage: test
+  script:
+    - ./jenkins/scripts/test.sh
+
+deploy:
+  stage: deploy
+  script:
+    - ./jenkins/scripts/deliver.sh
+  environment: production
+
+manual_confirmation:
+  stage: manual_confirmation
+  script:
+    - echo "Review the deployment and click 'Proceed' to continue"
+  when: manual
+  allow_failure: false
+
+cleanup_job:
+  stage: cleanup_job
+  script:
+    - ./jenkins/scripts/deliver.sh
+    - ./jenkins/scripts/kill.sh
